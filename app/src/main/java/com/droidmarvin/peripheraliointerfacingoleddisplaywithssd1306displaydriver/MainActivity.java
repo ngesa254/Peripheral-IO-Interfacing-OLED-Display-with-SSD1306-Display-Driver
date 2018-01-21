@@ -29,7 +29,18 @@ public class MainActivity extends Activity {
         }
         Log.d(TAG, "OLED screen activity created");
     }
-
+//Close the display
+private void destroyOledDisplay() {
+    if (mOled != null) {
+        try {
+            mOled.close();
+        } catch (IOException e) {
+            Log.e(TAG, "Error closing SSD1306", e);
+        } finally {
+            mOled = null;
+        }
+    }
+}
 
 }
 
