@@ -20,6 +20,12 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        destroyOledDisplay();
+    }
+
     //setup the OLED Display
     private void setupOledDisplay() {
         try {
