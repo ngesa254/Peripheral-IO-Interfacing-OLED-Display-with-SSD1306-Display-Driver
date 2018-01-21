@@ -36,7 +36,27 @@ public class MainActivity extends Activity {
         }
         Log.d(TAG, "OLED screen activity created");
     }
-//Close the display
+
+    // Draw on the screen
+    private void drawOnScreen(){
+
+        try {
+            for (int i = 0; i < mOled.getLcdWidth(); i++) {
+                for (int j = 0; j < mOled.getLcdHeight(); j++) {
+                    // checkerboard
+                    mOled.setPixel(i, j, (i % 2) == (j % 2));
+                }
+            }
+            mOled.show(); // render the pixel data
+
+            // You can also use BitmapHelper to render a bitmap instead of setting pixels manually
+        } catch (IOException e) {
+            // error setting display
+        }
+    }
+
+
+    //Close the display
 private void destroyOledDisplay() {
     if (mOled != null) {
         try {
