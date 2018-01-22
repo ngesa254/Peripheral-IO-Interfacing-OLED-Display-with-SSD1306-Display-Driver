@@ -15,6 +15,8 @@ public class MainActivity extends Activity {
     private static final String I2C_OLED_BUS = "I2C1";
     private Ssd1306 mOled;
 
+    private int mTick = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,7 +57,22 @@ public class MainActivity extends Activity {
             // error setting display
         }
     }
-
+    /**
+     * Draws crosshair pattern.
+     */
+    private void drawCrosshairs() {
+        mOled.clearPixels();
+        int y = mTick % mOled.getLcdHeight();
+        for (int x = 0; x < mOled.getLcdWidth(); x++) {
+            mOled.setPixel(x, y, true);
+            mOled.setPixel(x, mOled.getLcdHeight() - (y + 1), true);
+        }
+        int x = mTick % mOled.getLcdWidth();
+        for (y = 0; y < mOled.getLcdHeight(); y++) {
+            mOled.setPixel(x, y, true);
+            mOled.setPixel(mOled.getLcdWidth() - (x + 1), y, true);
+        }
+    }
 
     //Close the display
 private void destroyOledDisplay() {
