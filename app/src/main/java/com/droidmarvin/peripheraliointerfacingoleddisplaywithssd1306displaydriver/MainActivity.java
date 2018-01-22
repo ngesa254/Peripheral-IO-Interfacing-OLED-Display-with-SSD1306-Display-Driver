@@ -1,9 +1,12 @@
 package com.droidmarvin.peripheraliointerfacingoleddisplaywithssd1306displaydriver;
 
 import android.app.Activity;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.google.android.things.contrib.driver.ssd1306.BitmapHelper;
 import com.google.android.things.contrib.driver.ssd1306.Ssd1306;
 
 import java.io.IOException;
@@ -13,11 +16,17 @@ public class MainActivity extends Activity {
     private static final String TAG = MainActivity.class.getSimpleName();
 
     private static final String I2C_OLED_BUS = "I2C1";
+    private static final int BITMAP_FRAMES_PER_MOVE = 4; // Frames to show bitmap before moving it
+
     private Ssd1306 mOled;
 
     private boolean mExpandingPixels = true;
     private int mTick = 0;
     private int mDotMod = 1;
+    private int mBitmapMod = 0;
+
+    private Bitmap mBitmap;
+
     private Modes mMode = Modes.BITMAP;
 
     enum Modes {
@@ -109,6 +118,29 @@ public class MainActivity extends Activity {
                 mExpandingPixels = true;
                 mDotMod = 1;
             }
+        }
+    }
+
+    /**
+     * Draws a BMP in one of three positions.
+     */
+    private void drawMovingBitmap() {
+        if (mBitmap == null) {
+            //mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.flower);
+        }
+        // Move the bmp every few ticks
+        if (mTick % BITMAP_FRAMES_PER_MOVE == 0) {
+            mOled.clearPixels();
+            // Move the bitmap back and forth based on mBitmapMod:
+            // 0 - left aligned
+            // 1 - centered
+            // 2 - right aligned
+            // 3 - centered
+            int diff = mOled.getLcdWidth() - mBitmap.getWidth();
+            int mult = mBitmapMod == 3 ? 1 : mBitmapMod; // 0, 1, or 2
+            int offset = mult * (diff / 2);
+            BitmapHelper.setBmpData(mOled, offset, 0, mBitmap, false);
+            mBitmapMod = (mBitmapMod + 1) % 4;
         }
     }
 
