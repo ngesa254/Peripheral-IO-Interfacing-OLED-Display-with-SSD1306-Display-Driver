@@ -15,7 +15,16 @@ public class MainActivity extends Activity {
     private static final String I2C_OLED_BUS = "I2C1";
     private Ssd1306 mOled;
 
+    private boolean mExpandingPixels = true;
     private int mTick = 0;
+    private int mDotMod = 1;
+    private Modes mMode = Modes.BITMAP;
+
+    enum Modes {
+        CROSSHAIRS,
+        DOTS,
+        BITMAP
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,6 +80,35 @@ public class MainActivity extends Activity {
         for (y = 0; y < mOled.getLcdHeight(); y++) {
             mOled.setPixel(x, y, true);
             mOled.setPixel(mOled.getLcdWidth() - (x + 1), y, true);
+        }
+    }
+
+    /**
+     * Draws expanding and contracting pixels.
+     */
+    private void drawExpandingDots() {
+        if (mExpandingPixels) {
+            for (int x = 0; x < mOled.getLcdWidth(); x++) {
+                for (int y = 0; y < mOled.getLcdHeight() && mMode == Modes.DOTS; y++) {
+                    mOled.setPixel(x, y, (x % mDotMod) == 1 && (y % mDotMod) == 1);
+                }
+            }
+            mDotMod++;
+            if (mDotMod > mOled.getLcdHeight()) {
+                mExpandingPixels = false;
+                mDotMod = mOled.getLcdHeight();
+            }
+        } else {
+            for (int x = 0; x < mOled.getLcdWidth(); x++) {
+                for (int y = 0; y < mOled.getLcdHeight() && mMode == Modes.DOTS; y++) {
+                    mOled.setPixel(x, y, (x % mDotMod) == 1 && (y % mDotMod) == 1);
+                }
+            }
+            mDotMod--;
+            if (mDotMod < 1) {
+                mExpandingPixels = true;
+                mDotMod = 1;
+            }
         }
     }
 
