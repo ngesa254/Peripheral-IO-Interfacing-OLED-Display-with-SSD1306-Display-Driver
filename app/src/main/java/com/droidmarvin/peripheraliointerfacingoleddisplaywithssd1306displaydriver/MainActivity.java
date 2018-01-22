@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 
 import com.google.android.things.contrib.driver.ssd1306.BitmapHelper;
@@ -16,6 +17,7 @@ public class MainActivity extends Activity {
     private static final String TAG = MainActivity.class.getSimpleName();
 
     private static final String I2C_OLED_BUS = "I2C1";
+    private static final int FPS = 30; // Frames per second on draw thread
     private static final int BITMAP_FRAMES_PER_MOVE = 4; // Frames to show bitmap before moving it
 
     private Ssd1306 mOled;
@@ -26,6 +28,7 @@ public class MainActivity extends Activity {
     private int mBitmapMod = 0;
 
     private Bitmap mBitmap;
+    private Handler mHandler = new Handler();
 
     private Modes mMode = Modes.BITMAP;
 
@@ -143,6 +146,37 @@ public class MainActivity extends Activity {
             mBitmapMod = (mBitmapMod + 1) % 4;
         }
     }
+
+    private Runnable mDrawRunnable = new Runnable() {
+        /**
+         * Updates the display and tick counter.
+         */
+        @Override
+        public void run() {
+            // exit Runnable if the device is already closed
+            if (mOled == null) {
+                return;
+            }
+            mTick++;
+            try {
+                switch (mMode) {
+                    case DOTS:
+                        drawExpandingDots();
+                        break;
+                    case BITMAP:
+                        drawMovingBitmap();
+                        break;
+                    default:
+                        drawCrosshairs();
+                        break;
+                }
+                mOled.show();
+                mHandler.postDelayed(this, 1000 / FPS);
+            } catch (IOException e) {
+                Log.e(TAG, "Exception during screen update", e);
+            }
+        }
+    };
 
     //Close the display
 private void destroyOledDisplay() {
